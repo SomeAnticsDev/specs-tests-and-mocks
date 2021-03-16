@@ -1,8 +1,17 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import App from './App';
+import {setupServer} from 'msw/node';
+import handlers from './handlers';
 
-test('renders learn react link', () => {
+const server = setupServer(...handlers);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+test('renders initial screen', async () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.queryByText("☕☕☕☕☕")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button"));
+  expect(await screen.findByText("☕☕☕☕☕")).toBeInTheDocument();
 });
